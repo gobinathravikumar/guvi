@@ -1,0 +1,42 @@
+use youtube;
+truncate table video;
+create table playlist(playlist_id varchar(255),
+						channel_id varchar(255),
+                        playlist_name varchar(255));
+create table comment(comment_id varchar(255),
+						video_id varchar(255),
+                        comment_text text,
+                        comment_author varchar(255),
+                        comment_published_date datetime
+                        );
+create table video(video_id varchar(255),
+					playlist_id varchar(255),
+                    video_name varchar(255),
+                    video_descrption text,
+                    published_date datetime,
+                    view_count int,
+                    like_count int,
+                    dislike_count int,
+                    favorite_count int,
+                    comment_count int,
+                    duration int,
+                    thumbnail varchar(255),
+                    caption_status varchar(255));
+DROP table video;
+-- select a.video_name,b.channel_name from video a,playlist1 c,channel b where a.playlist_id=c.playlist_id and c.channel_id=b.channel_id
+SELECT a.video_name, b.channel_name
+FROM video a
+JOIN playlist c ON a.playlist_id = c.playlist_id
+JOIN channel b ON c.channel_id = b.channel_id;
+
+create table channel (
+    channel_id varchar(255) ,
+    channel_name VARCHAR(255),
+    channel_view INT,
+    channel_description VARCHAR(3900)
+);
+ALTER TABLE channel MODIFY channel_description VARCHAR(3900);
+select * from youtube.channel;
+select * from youtube.video;
+select * from youtube.comment;
+select * from youtube.playlist;
