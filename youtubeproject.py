@@ -116,7 +116,7 @@ def get_comment_in_video(youtube, video_ids):
 
         except HttpError as e:
             if e.resp.status == 404:
-                print(f"Video not found for video ID: {video_id}")
+                print(f"Video not found for video ID: {video_ids}")
             else:
                 pass
 
@@ -161,7 +161,8 @@ if transfer:
             collection.insert_many(comment_data)
             st.write(comment_data)
         else:
-            st.write("No comments found for video:", video_id)
+            st.write("No comments found for video:", video_ids)
+
 mysql_db = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -263,21 +264,91 @@ mysql_db.commit()
 # mongo_client.close()
 # mysql_cursor.close()
 # mysql_db.close()
-question=['SELECT a.video_name, b.channel_name FROM video a JOIN playlist c ON a.playlist_id = c.playlist_id JOIN channel b ON c.channel_id = b.channel_id;'
-    ,'SELECT channel_name, COUNT(*) AS video_count FROM video JOIN channel ON video.playlist_id = channel.channel_id GROUP BY channel_name ORDER BY video_count DESC;'
-          ,'SELECT video.video_name, channel.channel_name, video.view_count FROM video JOIN channel ON video.playlist_id = channel.channel_id ORDER BY video.view_count DESC LIMIT 10;'
-           ,'SELECT video.video_name, COUNT(comment.comment_id) AS comment_count FROM video LEFT JOIN comment ON video.video_id = comment.video_id GROUP BY video.video_id, video.video_name;'
-           , 'SELECT video.video_name, channel.channel_name, video.like_count FROM video INNER JOIN channel ON video.playlist_id_id = channel.channel_id WHERE video.likes = (SELECT MAX(like_count) FROM video);'
-            ,'SELECT video.video_name, SUM(video.like_count) AS total_likes, SUM(video.dislike_count) AS total_dislikes FROM video GROUP BY video.video_name;'
-            ,'SELECT channel.channel_name, SUM(video.view_count) AS total_views FROM channel JOIN video ON channel.channel_id = video.playlist_id GROUP BY channel.channel_name;'
-             ,'SELECT DISTINCT channel.channel_name FROM channel JOIN video ON channel.channel_id = video.playlist_id WHERE YEAR(video.publish_date) = 2022;'
-              ,'SELECT channel.channel_name, AVG(video.duration) AS average_duration FROM channel JOIN video ON channel.channel_id = video.playlist_id GROUP BY channel.channel_name;'
-              ,'SELECT video.video_name, channel.channel_name, COUNT(comment.comment_id) AS comment_count FROM video JOIN channel ON video.playlist_id = channel.channel_id JOIN comment ON video.video_id = comment.video_id GROUP BY video.video_id ORDER BY comment_count DESC LIMIT 10;']
-query=st.selectbox('select query :', question)
-if query:
-    # st.write(query)
-    load_data=mysql_cursor.execute(query)
+
+Q1=st.button('What are the names of all the videos and their corresponding channels?')
+Q2=st.button('Which channels have the most number of videos, and how many videos do they have?')
+Q3=st.button('What are the top 10 most viewed videos and their respective channels?')
+Q4=st.button('How many comments were made on each video, and what are their corresponding video names?')
+Q5=st.button('Which videos have the highest number of likes, and what are their corresponding channel names?')
+Q6=st.button('What is the total number of likes and dislikes for each video, and what are their corresponding video names?')
+Q7=st.button('What is the total number of views for each channel, and what are their corresponding channel names?')
+Q8=st.button('What are the names of all the channels that have published videos in the year 2022?')
+Q9=st.button('What is the average duration of all videos in each channel, and what are their corresponding channel names?')
+Q10=st.button('Which videos have the highest number of comments, and what are their corresponding channel names?')
+if Q1:
+    load_data = mysql_cursor.execute('SELECT a.video_name, b.channel_name FROM video a JOIN playlist c ON a.playlist_id = c.playlist_id JOIN channel b ON c.channel_id = b.channel_id;')
     result = mysql_cursor.fetchall()
     st.write(result)
-    df = pd.DataFrame(result, columns=["Video Name", "Channel Name", 'total_like'])
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
     st.write(df)
+if Q2:
+    load_data = mysql_cursor.execute('SELECT channel_name, COUNT(*) AS video_count FROM video JOIN channel ON video.playlist_id = channel.channel_id GROUP BY channel_name ORDER BY video_count DESC;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q3:
+    load_data = mysql_cursor.execute('SELECT video.video_name, channel.channel_name, video.view_count FROM video JOIN channel ON video.playlist_id = channel.channel_id ORDER BY video.view_count DESC LIMIT 10;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q4:
+    load_data = mysql_cursor.execute('SELECT video.video_name, COUNT(comment.comment_id) AS comment_count FROM video LEFT JOIN comment ON video.video_id = comment.video_id GROUP BY video.video_id, video.video_name;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q5:
+    load_data = mysql_cursor.execute('SELECT video.video_name, channel.channel_name, video.like_count FROM video INNER JOIN channel ON video.playlist_id = channel.channel_id WHERE video.like_count = (SELECT MAX(like_count) FROM video);')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q6:
+    load_data = mysql_cursor.execute('SELECT video.video_name, SUM(video.like_count) AS total_likes, SUM(video.dislike_count) AS total_dislikes FROM video GROUP BY video.video_name;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q7:
+    load_data = mysql_cursor.execute('SELECT channel.channel_name, SUM(video.view_count) AS total_views FROM channel JOIN video ON channel.channel_id = video.playlist_id GROUP BY channel.channel_name;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q8:
+    load_data = mysql_cursor.execute('SELECT DISTINCT channel.channel_name FROM channel JOIN video ON channel.channel_id = video.playlist_id WHERE YEAR(video.publish_date) = 2022;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q9:
+    load_data = mysql_cursor.execute('SELECT channel.channel_name, AVG(video.duration) AS average_duration FROM channel JOIN video ON channel.channel_id = video.playlist_id GROUP BY channel.channel_name;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+if Q10:
+    load_data = mysql_cursor.execute('SELECT video.video_name, channel.channel_name, COUNT(comment.comment_id) AS comment_count FROM video JOIN channel ON video.playlist_id = channel.channel_id JOIN comment ON video.video_id = comment.video_id GROUP BY video.video_id ORDER BY comment_count DESC LIMIT 10;')
+    result = mysql_cursor.fetchall()
+    st.write(result)
+    df = pd.DataFrame(result, columns=["Video Name", "Channel Name"])
+    st.write(df)
+
+
+
+
+
+
+
+
+
+
+# if query:
+#     # st.write(query)
+#     load_data=mysql_cursor.execute(query)
+#     result = mysql_cursor.fetchall()
+#     st.write(result)
+#     df = pd.DataFrame(result, columns=["Video Name", "Channel Name", 'total_like'])
+#     st.write(df)
